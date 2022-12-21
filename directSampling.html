@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pi using Direct Sampling</title>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <script>
+
+      let samples = [];
+      let trials = 0;
+      let n = 10;
+      let hits = 0;
+
+      function setup(){
+        createCanvas(500, 500);
+        background(51);
+      }
+
+      function draw(){
+        noFill(); stroke(200, 50, 50);
+        circle(width/2, height/2, width);
+        samples.forEach(s => s.draw());
+        if (trials < n){
+          takeSample();
+        } else {
+          checkForHits();
+          textSize(32); fill(255); stroke(0);
+          text("Trials: "+ trials, width/2 - 200, height/2 - 40);
+          text("Hits: " + hits, width/2 - 200, height/2);
+          text("Approximation of Pi: " + 4*(hits/trials), width/2 - 200, height/2 + 40);
+          noLoop();
+        }
+      }
+
+      function takeSample(){
+        samples.push(new Sample(random(-1, 1), random(-1, 1)));
+        trials++;
+      }
+
+      function checkForHits(){
+        console.log("checking for hits");
+        samples.forEach(s => {
+          if (sq(s.vector.x) + sq(s.vector.y) < 1){
+            s.hit();
+            s.draw();
+            hits++;
+          }
+        });
+      }
+
+      class Sample{
+        constructor(x, y){
+          this.vector = createVector(x, y);
+          this.color = { r: 50, g: 50, b: 200 };
+        }
+        draw(){
+          stroke(this.color.r, this.color.g, this.color.b); strokeWeight(5);
+          point(map(this.vector.x, -1, 1, 0, 500), map(this.vector.y, -1, 1, 0, 500));
+        }
+        hit(){
+          this.color.r = 200;
+          this.color.g = 150;
+          this.color.b = 150;
+        }
+      }
+
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>

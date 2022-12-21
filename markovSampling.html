@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pi using Markov-Chain Sampling</title>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <script>
+
+      let samples = [];
+      let throws = 0;
+      let hits = 0;
+      let n = 10000;
+      let walker;
+
+      function setup(){
+        paused = true;
+        createCanvas(500, 500);
+        background(15);
+        walker = new Walker();
+      }
+
+      function draw(){
+        background(15);
+        noFill(); stroke(200, 50, 50); strokeWeight(2);
+        circle(width/2, height/2, width);
+        if (paused) return;
+        samples.forEach(s => s.draw());
+        walker.draw();
+        if (throws < n){
+          walker.throwPebble();
+        } else {
+          checkForHits();
+          printText();
+          noLoop();
+        }
+      }
+
+      function printText(){
+        textSize(32); fill(255); noStroke();
+        text("Throws: "+ throws, width/2 - 200, height/2 - 40);
+        text("Hits: " + hits, width/2 - 200, height/2);
+        text("Approximation of Pi: " + 4*(hits/throws), width/2 - 200, height/2 + 40);
+      }
+
+      function keyPressed(){
+        if (keyCode === ENTER){
+          paused = false;
+        }
+      }
+
+      function checkForHits(){
+        samples.forEach(s => {
+          if (sq(s.vector.x) + sq(s.vector.y) < 1){
+            s.hit();
+            s.draw();
+            hits++;
+          }
+        });
+      }
+
+      class Walker{
+          constructor(){
+            this.vector = createVector(1, 1);
+            // this.vector = createVector(random(-1, 1), random(-1, 1));
+          }
+
+          draw(){
+            stroke(255); strokeWeight(15);
+            point(map(this.vector.x, -1, 1, 0, width), map(this.vector.y, -1, 1, 0, height));
+          }
+
+          throwPebble(){
+            throws++;
+            let v = createVector(random(-0.1, 0.1), random(-0.1, 0.1)); // throw
+            let v2 = p5.Vector.add(this.vector, v);
+
+            if (abs(v2.x) > 1 || abs(v2.y) > 1){
+              samples.push(new Sample(this.vector.x, this.vector.y));
+            } else {
+              samples.push(new Sample(v2.x, v2.y));
+              this.move(v);
+            }
+          }
+
+          move(v){
+            this.vector.add(v);
+          }
+      }
+
+      class Sample{
+          constructor(x, y){
+            this.vector = createVector(x, y);
+            this.color = { r: 50, g: 50, b: 220 };
+          }
+
+          draw(){
+            stroke(this.color.r, this.color.g, this.color.b, 100); strokeWeight(7);
+            point(map(this.vector.x, -1, 1, 0, 500), map(this.vector.y, -1, 1, 0, 500));
+          }
+
+          hit(){
+            this.color.r = 200;
+            this.color.g = 150;
+            this.color.b = 150;
+          }
+      }
+
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>
